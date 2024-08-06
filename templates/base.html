@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <!-- 분기처리(로그인도 안했는데 로그인, 로그아웃 버튼을 다 보여줄 순없으니) -->
+    {% if user.is_authenticated %}
+        <a href="{% url 'accounts:logout' %}">logout</a>
+        <a href="{% url 'articles:create' %}">create</a>
+        <p>{{user.username}}</p>
+    {% else %}    
+        <a href="{% url 'accounts:signup' %}">signup</a>
+        <a href="{% url 'accounts:login' %}">login</a>
+    {% endif %}
+
+    {% block body %}
+    {% endblock %}
+</body>
+</html>
