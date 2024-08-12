@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+{% block body %}
+    <h1>{{user_profile}}</h1>
+
+    <h1>작성한 게시물</h1>
+    {% for article in user_profile.article_set.all %}
+        <p>{{article.title}}</p>
+    {% endfor %}
+
+    <h1>작성한 댓글</h1>
+    {% for comment in user_profile.comment_set.all %}
+        <p>{{comment.article_id}} : {{comment.content}}</p>
+    {% endfor %}
+
+
+    {% for article in user_profile.article_set.all %}
+        <h2>{{article.title}}</h2>
+        {% for comment in article.comment_set.all %}
+            <p>{{comment.content}}</p>
+        {% endfor %}
+    {% endfor %}
+
+{% endblock %}

@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect
-from .forms import ArticleForm
-from .models import Article
+from .forms import ArticleForm, CommentForm
+from .models import Article, Comment
 from django.contrib.auth.decorators import login_required
 
 # Create your views here.
@@ -11,8 +11,8 @@ def index(request):
         'articles': articles,
     }
 
-
     return render(request, 'index.html', context)
+
 
 @login_required
 def create(request):
@@ -28,7 +28,7 @@ def create(request):
         form = ArticleForm()
 
     context = {
-        'form':form,
+        'form': form,
     }
 
     return render(request, 'form.html', context)
@@ -37,9 +37,70 @@ def create(request):
 @login_required
 def detail(request, id):
     article = Article.objects.get(id=id)
+    form = CommentForm()
 
     context = {
-        'article':article,
+        'article': article,
+        'form': form,
     }
 
     return render(request, 'detail.html', context)
+
+
+def delete(request, id):
+    article = Article.objects.get(id=id)
+    if request.user == article.user:
+        article.delete()
+
+    return redirect('articles:index')
+
+
+def update(request, id):
+    article = Article.objects.get(id=id)
+
+    if request.user != article.user:
+        return redirect('articles:index')
+
+    if request.method == 'POST':
+        form = ArticleForm(request.POST, instance=article)
+        if form.is_valid():
+            form.save()
+            return redirect('articles:detail', id=id)
+    else:
+        form = ArticleForm(instance=article) 
+
+    context = {
+        'form': form,
+    }
+
+    return render(request, 'form.html', context)
+
+
+def comment_create(request, article_id):
+    form = CommentForm(request.POST)
+
+    if form.is_valid():
+        comment = form.save(commit=False)
+
+        # 객체를 저장하는 경우
+        # comment.user = request.user
+        # article = Article.objects.get(id=article_id)
+        # comment.article = article
+
+        #id값만 저장하는 경우
+        comment.user_id = request.user.id
+        comment.article_id = article_id 
+
+        comment.save()
+
+        return redirect('articles:detail', id=article_id)
+
+
+@login_required
+def comment_delete(request, article_id, comment_id):
+
+    comment = Comment.objects.get(id=comment_id)
+    if request.user == comment.user:
+        comment.delete()
+
+    return redirect('articles:detail', id=article_id)

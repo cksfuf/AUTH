@@ -1,7 +1,47 @@
 {% extends 'base.html' %}
+{% load bootstrap5 %}
 
 {% block body %}
-<h1>{{article.title}}</h1>
-<p>{{article.content}}</p>
-<p>{{article.user}}</p>
+    <div class="card">
+        <div class="card-header">
+            <a href="{% url 'accounts:profile' username=article.user.username %}">{{article.user}}</a>
+        </div>
+        <div class="card-body">
+            <h5 class="card-title">{{article.title}}</h5>
+            <p class="card-text">{{article.content}}</p>
+        </div>
+        {% if user == article.user %}
+        <div class="card-footer">
+            <form class="d-inline" action="{% url 'articles:delete' id=article.id %}" method="POST">
+                {% csrf_token %}
+                <input type="submit" value="delete" class="btn btn-danger">
+            </form>
+            <form class="d-inline" action="{% url 'articles:update' id=article.id %}">
+                <input type="submit" value="update" class="btn btn-warning">
+            </form>
+        </div>
+        {% endif %}
+    </div>
+    <hr>
+
+    <form action="{% url 'articles:comment_create' article_id=article.id %}" method="POST">
+        {% csrf_token %}
+        {% bootstrap_form form %}
+        <input type="submit" class="btn btn-primary">
+    </form>
+
+    <hr>
+
+    {% for comment in article.comment_set.all %}
+        <div class="alert alert-light">
+            {{comment.user}} - {{comment.content}}
+
+            {% if user == comment.user %}
+            <form class="d-inline" action="{% url 'articles:comment_delete' article_id=article.id comment_id=comment.id %}" method="POST">
+                {% csrf_token %}
+                <input type="submit" value="delete" class="btn btn-danger btn-sm">
+            </form>
+            {% endif %}
+        </div>
+    {% endfor %}
 {% endblock %}

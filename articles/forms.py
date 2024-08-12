@@ -1,7 +1,16 @@
 from django import forms
-from .models import Article
+from .models import Article, Comment
+
 class ArticleForm(forms.ModelForm):
     class Meta():
         model = Article
-        # fields = ('title', 'content',) 이렇게 사용해도 됨
-        exclude = ('user',) # 보여주지 않을 것 지정해줌. exclude
+        # fields = '__all__'
+        # fields = ('title', 'contents',)
+        exclude = ('user', )
+
+
+class CommentForm(forms.ModelForm):
+    class Meta():
+        model = Comment
+        # fields = '__all__'
+        fields = ('content', )

@@ -2,14 +2,15 @@ from django.shortcuts import render, redirect
 from .forms import CustomUserCreationForm, CustomAuthenticationForm
 from django.contrib.auth import login as auth_login
 from django.contrib.auth import logout as auth_logout
-
+from .models import User
 # Create your views here.
 def signup(request):
     if request.method == 'POST':
         form = CustomUserCreationForm(request.POST)
         if form.is_valid():
             form.save()
-            return redirect('accounts:signup')
+            return redirect('accounts:login')
+
     else:
         form = CustomUserCreationForm()
 
@@ -25,10 +26,11 @@ def login(request):
         form = CustomAuthenticationForm(request, request.POST)
         if form.is_valid():
             auth_login(request, form.get_user())
-            # 로그인하지 않고 페이지 이동했다면 로그인시키고 이동하려는 페이지로 이동시키기.
+            # http://127.0.0.1:8000/accounts/login/
+            # http://127.0.0.1:8000/accounts/login/?next=/articles/1/
             next_url = request.GET.get('next')
-            # next 인자에 url이 없을 경우 -> None or 'articles:index' (없으면 'articles:index'로 이동)(단축평가)
-            # next 인자에 url이 있을 경우 -> '/articles/1/' or 'articles:index' (있으면 /articles/1/'로 이동)(단축평가)
+            # next 인자에 url이 없을 때 => None or 'articles:index'
+            # next 인자에 url이 있을 때 => '/articles/1/' or 'articles:index'
             return redirect(next_url or 'articles:index')
     else:
         form = CustomAuthenticationForm()
@@ -44,3 +46,14 @@ def logout(request):
     auth_logout(request)
 
     return redirect('accounts:login')
+
+
+def profile(request, username):
+
+    user_profile = User.objects.get(username=username)
+
+    context = {
+        'user_profile': user_profile, 
+    }
+
+    return render(request, 'profile.html', context)
